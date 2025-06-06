@@ -28,7 +28,7 @@ jobs:
           cd zig
           zig build
           cd ..
-          cp zig-out/lib/* slowda/  # adjust if needed
+          cp zig/zig-out/lib/* slowda/  # adjust if needed
 
       - name: Install dependencies
         run: |
