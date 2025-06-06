@@ -1,0 +1,44 @@
+name: Publish to Test PyPI (dev tags only)
+
+on:
+  push:
+    tags:
+      - "dev-v*" # only run when a version tag is pushed
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Zig
+        uses: korandoru/setup-zig@v1
+        with:
+          zig-version: master
+
+      - name: Build Zig library
+        run: |
+          zig build
+          cp zig-out/lib/* slowda/  # adjust if needed
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cibuildwheel twine
+
+      - name: Build wheels
+        run: cibuildwheel --output-dir wheelhouse
+
+      - name: Upload to Test PyPI
+        run: |
+          twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: pypi-AgENdGVzdC5weXBpLm9yZwIkMjAzYjYzZjQtNmNkYy00ZDJhLTljY2UtZDI4ODhkYzQ0MGZiAAIqWzMsIjFiMDc3NzU3LWMyYTAtNDg1Zi1iYzU3LTA1OWViMmQ5Y2NlMyJdAAAGIKzi5o6FrkWg788ABY5Y2bwCr6kxKoXenfwPp-CPGTF4

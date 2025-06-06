@@ -1,0 +1,10 @@
+build/
+dist/
+venv/
+check_venv/
+.zig-cache/
+zig-out/
+*.egg-info
+*.dylib
+*.so
+*.dll
