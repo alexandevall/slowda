@@ -12,7 +12,14 @@ class ZigBuildExt(build_ext):
         print("-> build zig project")
         zig_dir = os.path.abspath("zig")
         print("-> zig dir", zig_dir)
-        subprocess.check_call(["zig", "build"], cwd=zig_dir)
+
+        print("-> ls")
+        subprocess.check_call("ls")
+
+        print("-> ls done")
+
+        # subprocess.check_call(["zig", "build"], cwd=zig_dir)
+        subprocess.check_call(["zig", "build"], cwd="zig")
         print("-> did build")
         # Find the compiled shared library
         lib_dir = os.path.join(zig_dir, "zig-out", "lib")
