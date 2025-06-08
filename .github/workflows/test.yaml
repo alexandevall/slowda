@@ -1,59 +1,65 @@
-name: Build and Publish to Test PyPI (Linux only)
+name: Build Linux Wheel (Debug)
 
 on:
   push:
-    tags:
-      - "dev-v*"
+    branches:
+      - gemini-way # Or any branch you use for development
+  workflow_dispatch: # Allows you to run it manually from the Actions tab
 
 jobs:
-  build-linux:
+  build_wheel_linux:
+    name: Build wheel on Linux
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.11" # Be specific for debugging
 
-      - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install cibuildwheel twine
+      - name: Install Zig
+        uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: 0.11.0 # Use your project's Zig version
 
-      - name: "Check current directory"
-        run: |
-          pwd
-          ls
-          ls -R
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel
 
-      - name: Build wheels
+      - name: Build wheel
+        run: cibuildwheel --output-dir wheelhouse --platform linux
         env:
-          CIBW_BEFORE_BUILD: |
-            echo "Downloading Zig for Linux x86_64..."
-            curl -L https://ziglang.org/builds/zig-linux-x86_64-0.12.0.tar.xz | tar -xJ
-            echo "Adding Zig to PATH..."
-            export PATH=$PWD/zig-linux-x86_64-0.12.0:$PATH
+          # Pass the host's PATH to the container, making zig available.
+          CIBW_ENVIRONMENT: 'PATH="$PATH"'
 
-            echo "Zig version:"
-            zig version
+          # 1. Run the zig build command.
+          # 2. This command should place the .so file somewhere inside your python package source dir.
+          #    e.g., src/my_project/
+          CIBW_BEFORE_BUILD: >
+            (cd zig && zig build -Doptimize=ReleaseSafe) &&
+            cp zig/zig-out/lib/libslowda-zig.so src/slowda/
 
-            echo "Building Zig library..."
-            cd zig
-            zig build
+      - name: Store wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-wheel
+          path: ./wheelhouse
 
-            echo "Copying built libs to slowda package..."
-            cp zig-out/lib/* ../slowda/
+  publish_wheels:
+    name: Publish wheels to PyPI
+    needs: build_wheels
+    runs-on: ubuntu-latest
 
-            echo "Done with Zig build and copy."
-        run: |
-          cibuildwheel --output-dir wheelhouse
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
 
-      - name: Upload to Test PyPI
-        run: |
-          twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
