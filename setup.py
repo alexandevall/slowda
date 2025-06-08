@@ -14,7 +14,7 @@ class ZigBuildExt(build_ext):
         print("-> zig dir", zig_dir)
 
         print("-> ls")
-        subprocess.check_call("ls")
+        subprocess.check_call(["ls"])
 
         print("-> ls done")
 
