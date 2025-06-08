@@ -48,9 +48,9 @@ class ZigBuildExt(build_ext):
 
 
 # Dummy extension to trigger build_ext (even though we don't use it directly)
-ext_modules = [
-    Extension("slowda.zig_stub", sources=[]),
-]
+# ext_modules = [
+#     Extension("slowda.zig_stub", sources=[]),
+# ]
 
 print("-> set ups")
 
@@ -62,5 +62,5 @@ setup(
     package_data={"slowda": ["*.so", "*.dylib", "*.dll"]},
     zip_safe=False,
     cmdclass={"build_ext": ZigBuildExt},
-    ext_modules=ext_modules,
+    # ext_modules=ext_modules,
 )
