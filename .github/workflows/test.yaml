@@ -9,7 +9,7 @@ on:
 jobs:
   build_wheels:
     name: Build wheel on Linux
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
