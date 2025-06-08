@@ -1,4 +1,4 @@
-name: Publish to Test PyPI (dev tags only)
+name: Build and Publish to Test PyPI (Linux only)
 
 on:
   push:
@@ -6,12 +6,8 @@ on:
       - "dev-v*"
 
 jobs:
-  build-and-publish:
-    name: Build and Publish Wheels
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+  build-linux:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -27,21 +23,19 @@ jobs:
         with:
           zig-version: master
 
-      - name: Install dependencies
+      - name: Install build tools
         run: |
           python -m pip install --upgrade pip
           pip install cibuildwheel twine
 
-      - name: Build wheels with cibuildwheel
+      - name: Build wheels
         run: cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_VERBOSITY: "1"
-          CIBW_ARCHS_MACOS: "x86_64 arm64"
-          PATH: ${{ env.PATH }}:${{ github.workspace }}/.zig
 
       - name: Upload to Test PyPI
         run: |
           twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: pypi-AgENdGVzdC5weXBpLm9yZwIkMjAzYjYzZjQtNmNkYy00ZDJhLTljY2UtZDI4ODhkYzQ0MGZiAAIqWzMsIjFiMDc3NzU3LWMyYTAtNDg1Zi1iYzU3LTA1OWViMmQ5Y2NlMyJdAAAGIKzi5o6FrkWg788ABY5Y2bwCr6kxKoXenfwPp-CPGTF4
+          TWINE_PASSWORD: ${{ secrets.TEST_PYPI_TOKEN }}
