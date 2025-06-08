@@ -9,7 +9,7 @@ on:
 jobs:
   build_wheels:
     name: Build wheel on Linux
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout repository
@@ -29,19 +29,7 @@ jobs:
         run: pip install cibuildwheel
 
       - name: Build wheel
-        run: cibuildwheel --output-dir wheelhouse --platform linux
-        env:
-          # Pass the host's PATH to the container, making zig available.
-          CIBW_ENVIRONMENT: 'PATH="$PATH"'
-
-          # 1. Run the zig build command.
-          # 2. This command should place the .so file somewhere inside your python package source dir.
-          #    e.g., src/my_project/
-          CIBW_BEFORE_BUILD: |
-            echo $PATH
-            ls
-            cd zig && zig build -Doptimize=ReleaseSafe
-            cp zig/zig-out/lib/libslowda-zig.so slowda/
+        run: cibuildwheel --output-dir wheelhouse
 
       - name: Store wheel artifact
         uses: actions/upload-artifact@v4
