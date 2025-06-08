@@ -9,14 +9,19 @@ import sys
 class ZigBuildExt(build_ext):
     def run(self):
         # Build the Zig project
+        print("-> build zig project")
         zig_dir = os.path.abspath("zig")
+        print("-> zig dir", zig_dir)
         subprocess.check_call(["zig", "build"], cwd=zig_dir)
-
+        print("-> did build")
         # Find the compiled shared library
         lib_dir = os.path.join(zig_dir, "zig-out", "lib")
+        print("-> lib_dir", lib_dir)
         output_dir = os.path.join(os.path.dirname(__file__), "slowda")
+        print("-> output_dir", output_dir)
 
         for f in os.listdir(lib_dir):
+            print("-> f", f)
             if self.is_shared_lib(f):
                 print(f"Copying {f} to {output_dir}")
                 shutil.copy(os.path.join(lib_dir, f), output_dir)
@@ -32,6 +37,8 @@ class ZigBuildExt(build_ext):
 ext_modules = [
     Extension("slowda.zig_stub", sources=[]),
 ]
+
+print("-> set ups")
 
 setup(
     name="slowda",
