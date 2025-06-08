@@ -29,7 +29,8 @@ jobs:
           pip install cibuildwheel twine
 
       - name: Build wheels
-        run: cibuildwheel --output-dir wheelhouse
+        run: |
+          CIBW_BEFORE_BUILD="cd zig && zig build && cp zig-out/lib/* ../slowda/" cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD_VERBOSITY: "1"
 
