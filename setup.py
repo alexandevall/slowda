@@ -3,7 +3,6 @@ from setuptools.command.build_ext import build_ext
 import os
 import shutil
 import subprocess
-import sys
 
 
 class ZigBuildExt(build_ext):
