@@ -8,6 +8,14 @@ import sys
 
 class ZigBuildExt(build_ext):
     def run(self):
+        # se where we are
+        here = os.path.abspath(os.path.dirname(__file__))
+        print("-> here", here)
+        zig_dir = os.path.join(here, "zig")
+        print("-> zig_dir", zig_dir)
+        output_lib_dir = os.path.join(zig_dir, "zig-out", "lib")
+        print("-> output_lib_dir", output_lib_dir)
+
         # Build the Zig project
         print("-> build zig project")
         zig_dir = os.path.abspath("zig")
