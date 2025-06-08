@@ -35,10 +35,58 @@ jobs:
           ls -R
 
       - name: Build wheels
-        run: |
-          CIBW_BEFORE_BUILD="cd zig && zig build && cp zig-out/lib/* ../slowda/" cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_BUILD_VERBOSITY: "1"
+          CIBW_PLATFORM: ${{ matrix.os == 'ubuntu-latest' && 'linux-x86_64' || matrix.os == 'macos-latest' && 'macosx-x86_64' || matrix.os == 'windows-latest' && 'windows-x86_64' }}
+          CIBW_BEFORE_BUILD: |
+            set -e
+            echo "Starting Zig install for platform: $CIBW_PLATFORM"
+
+            case "$CIBW_PLATFORM" in
+              "linux-x86_64")
+                echo "Downloading Zig for Linux x86_64..."
+                curl -L https://ziglang.org/builds/zig-linux-x86_64-0.12.0.tar.xz | tar -xJ
+                echo "Adding Zig to PATH..."
+                export PATH=$PWD/zig-linux-x86_64-0.12.0:$PATH
+                ;;
+              "macosx-x86_64")
+                echo "Downloading Zig for macOS x86_64..."
+                curl -L https://ziglang.org/builds/zig-macos-x86_64-0.12.0.tar.xz | tar -xJ
+                echo "Adding Zig to PATH..."
+                export PATH=$PWD/zig-macos-x86_64-0.12.0:$PATH
+                ;;
+              "macosx-arm64")
+                echo "Downloading Zig for macOS arm64..."
+                curl -L https://ziglang.org/builds/zig-macos-aarch64-0.12.0.tar.xz | tar -xJ
+                echo "Adding Zig to PATH..."
+                export PATH=$PWD/zig-macos-aarch64-0.12.0:$PATH
+                ;;
+              "windows-x86_64")
+                echo "Downloading Zig for Windows x86_64..."
+                curl -L -o zig-windows.zip https://ziglang.org/builds/zig-windows-x86_64-0.12.0.zip
+                echo "Extracting Zig..."
+                unzip zig-windows.zip
+                echo "Adding Zig to PATH..."
+                export PATH=$PWD/zig-windows-x86_64-0.12.0:$PATH
+                ;;
+              *)
+                echo "Unsupported platform: $CIBW_PLATFORM"
+                exit 1
+                ;;
+            esac
+
+            echo "Zig version:"
+            zig version
+
+            echo "Building Zig library..."
+            cd zig
+            zig build
+
+            echo "Copying built libs to slowda package..."
+            cp zig-out/lib/* ../slowda/
+
+            echo "Done with Zig build and copy."
+        run: |
+          cibuildwheel --output-dir wheelhouse
 
       - name: Upload to Test PyPI
         run: |
