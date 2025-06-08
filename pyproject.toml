@@ -1,3 +1,15 @@
 [build-system]
-requires = ["setuptools", "wheel", "cibuildwheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "slowda"
+version = "0.1.0"
+# ... other metadata like authors, license, etc.
+
+[tool.setuptools]
+# This tells setuptools to find packages in the 'src' directory
+package-dir = {"" = "slowda"}
+# This is crucial! It tells setuptools to include non-Python files found in your package.
+# We are telling it to include any file within the 'my_project/lib' directory.
+include-package-data = true

@@ -38,8 +38,10 @@ jobs:
           # 2. This command should place the .so file somewhere inside your python package source dir.
           #    e.g., src/my_project/
           CIBW_BEFORE_BUILD: >
+            echo $PATH
+            ls
             (cd zig && zig build -Doptimize=ReleaseSafe) &&
-            cp zig/zig-out/lib/libslowda-zig.so src/slowda/
+            cp zig/zig-out/lib/libslowda-zig.so slowda/
 
       - name: Store wheel artifact
         uses: actions/upload-artifact@v4
